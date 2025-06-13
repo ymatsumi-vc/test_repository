@@ -1,5 +1,5 @@
 /// やりとり > 投稿レポート確認画面
-/// https://github.com/BUZMA-Inc/buzma.enterprise/blob/7c7eaed98370a683b39b7f6f93ade66561de3390/lib/invitation_match/invitation_match_report_confirm/invitation_match_report_confirm_widget.dart#L685
+/// /lib/invitation_match/invitation_match_report_confirm/invitation_match_report_confirm_widget.dart#L685
 /// この上にいれる
 if (widget.invitations.hasPrReward())
     Padding(
