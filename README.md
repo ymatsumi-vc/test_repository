@@ -1,6 +1,6 @@
 # flutter_test_ymatsumi
 
-A new Flutter project.
+A SAMPLE Flutter project.
 
 ## Getting Started
 
