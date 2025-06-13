@@ -1,7 +1,7 @@
 /// やりとり > 投稿レポート確認画面
 /// /lib/invitation_match/invitation_match_report_confirm/invitation_match_report_confirm_widget.dart#L685
 /// この上にいれる
-if (widget.invitations.hasPrReward())
+if (widget.invitation.hasPrReward())
     Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
         child: Text(
@@ -62,32 +62,33 @@ if (widget.invitations.hasPrReward())
 /// /lib/invitation_match/invitation_match_sns_waiting/invitation_match_sns_waiting_widget.dart#L165
 
 ///それぞれのProcessStatusCardWidgetの上あたりに追加
-Padding(
-    padding: const EdgeInsets.fromLTRB(0.0, 40.0, 0.0, 56.0),
-    child: Container(
-        margin: const EdgeInsets.all(16.0),
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(4.0),
-        ),
-        child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-                const Padding(
-                    padding: EdgeInsets.only(top: 4.0),
-                    child: Icon(Icons.info_outline),
-                ),
-                Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Expanded(
-                        child: Text(
-                            "本イベントでは、PR投稿および投稿レポートの確認完了後に、...",
-                            style: TextStyle(fontSize: 14), // Replace with your theme
+if (widget.invitation.hasPrReward())
+    Padding(
+        padding: const EdgeInsets.fromLTRB(0.0, 40.0, 0.0, 56.0),
+        child: Container(
+            margin: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(4.0),
+            ),
+            child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                    const Padding(
+                        padding: EdgeInsets.only(top: 4.0),
+                        child: Icon(Icons.info_outline),
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Expanded(
+                            child: Text(
+                                "本イベントでは、PR投稿および投稿レポートの確認完了後に、...",
+                                style: TextStyle(fontSize: 14), // Replace with your theme
+                            ),
                         ),
                     ),
-                ),
-            ],
+                ],
+            ),
         ),
     ),
-),
