@@ -1,7 +1,6 @@
 /// 取材パス＞取材パス
 /// lib/task/task_bottom_sheet/each_task/visiting/visiting_widget.dart#L324
-
-このText下に追加
+/// このText下に追加
 if (widget.match.invitation.hasPrReward())
   Text(
     'Text追加',
@@ -10,7 +9,6 @@ if (widget.match.invitation.hasPrReward())
 
 /// やること＞投稿前ステータス
 /// lib/task/task_bottom_sheet/each_task/submit_sns_reviews/submit_sns_review_widget.dart#L1854C17-L1863C19
-
 /// Text()内容修正
 /// このText下に追加
 if (widget.match.invitation.hasPrReward())
