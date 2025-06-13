@@ -78,14 +78,16 @@ Padding(
                     padding: EdgeInsets.only(top: 4.0),
                     child: Icon(Icons.info_outline),
                 ),
-                const SizedBox(width: 8.0),
-                Expanded(
-                    child: Text(
-                        "本イベントでは、PR投稿および投稿レポートの確認完了後に、..",
-                        style: FlutterFlowTheme.of(context).bodyMedium.copyWith(),
+                Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Expanded(
+                        child: Text(
+                            "本イベントでは、PR投稿および投稿レポートの確認完了後に、...",
+                            style: TextStyle(fontSize: 14), // Replace with your theme
+                        ),
                     ),
                 ),
             ],
         ),
     ),
-);
+),
