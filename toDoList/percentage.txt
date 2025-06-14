@@ -10,3 +10,42 @@
 15%: やること＞PR投稿スキップ (FlutterFlow変えれる?)
 10%: やること > インサイトデータ提出
 10%: やること＞イベント評価中ステータス
+
+[報酬支払先情報]
+//閲覧画面
+・_initializeData() async{}でsetStateを呼ぶ
+　・setState(() {
+      payoutContact = resPayoutContact.unwrap();
+      bankAccount = resBankAccount.unwrap();
+      isNew = false;
+    });
+・177 mainAxisSize: MainAxisSize.max,省略可能
+・186 borderRadius: BorderRadius.circular(0.0),デフォルトなので削除できる
+
+//住所情報
+・氏名、登録番号は1度登録すると変更できない旨を記載
+・不要setState削除
+　・lastNameController
+　・firstNameController
+　・lastNameKanaController
+　・firstNameKanaController
+　・address2Controller
+　・address3Controller
+　・address4Controller
+　・invoiceRegistrationNumberController
+
+//銀行情報
+・print()2か所削除
+・final edit削除
+・不要setState削除
+　・_model.bankAccountNumberController
+　・_model.bankAccountNameController
+// 修正前
+onChanged: (value) {
+  setState(() {
+    _model.bankAccountNumberController.text = value;
+  });
+},
+
+// 修正後
+何も書かなくてOK（onChanged自体削除）
