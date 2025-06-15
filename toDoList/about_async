@@ -1,6 +1,7 @@
 同期処理
 
 [非同期処理]
+https://zenn.dev/urasan/articles/f6613470658de1
 メリット
 ・無駄な待ち時間が少ない
 デメリット
@@ -14,33 +15,16 @@ Flutterの非同期
 1.Futureについて
 https://api.flutter.dev/flutter/dart-async/Future-class.html
 Futureコード例①
-Future<void> task1() {
-  return Future.delayed(const Duration(seconds: 2), () => print('task1'));
-}
-
-void tast2() {
-  return print("task2");
-}
-
-コード例②
 void main() {
   print('ユーザ情報を取得しています...');
   print(createOrderMessage());
 }
 
 String createOrderMessage() {
-  var order = fetchUserInfo(); // awaitをつける必要がある。
+  var order = fetchUserInfo();
   return '私の名前は $order です';
 }
 
-// 疑似的に時間がかかる処理を再現
-Future<String> fetchUserInfo() {
-  return Future.delayed(
-    const Duration(seconds: 2),
-    () => '田中太郎',
-  );
-}
-//output
 ユーザ情報を取得しています...
 私の名前は Instance of '_Future<String>' です
 
@@ -64,6 +48,30 @@ Future<String> fetchUserInfo() {
   );
 }
 
+ユーザ情報を取得しています...
+私の名前は 田中太郎 です
+
+void main()  {
+  print('ユーザ情報を取得しています...');
+  print(createOrderMessage());
+}
+
+Future<String> createOrderMessage() async {
+  var order = await fetchUserInfo();
+  return '私の名前は $order です';
+}
+
+// 疑似的に時間がかかる処理を再現
+Future<String> fetchUserInfo() {
+  return Future.delayed(
+    const Duration(seconds: 2),
+    () => '田中太郎',
+  );
+}
+
+ユーザ情報を取得しています...
+Instance of '_Future<String>'
+
 ・非同期のメソッドを定義する場合はasyncのキーワードをメソッド名の後ろに付与する。(ここではasyncFuncの後ろにくっついてる　async てやつ)
 ・Future<String> というのは関数の型。「Futureクラス型」ということ。そして関数、メソッドの戻り値を<>ここに入れている。(ここではStirng型)
 将来的にはString型の戻り値ですよ〜ってこと。
@@ -72,12 +80,80 @@ Future<String> fetchUserInfo() {
 ・awaitキーワードを付与した処理を待つという点
 ・awaitを使用する場合は、asyncキーワードを必ず明記する必要がある。
 
+
 2.Streamについて
 https://api.flutter.dev/flutter/dart-async/Stream-class.html
 Futureは、１つの値を返し、1度きりの処理で完了する非同期処理を行う場合に用いる事が多い
 Streamは、１つ以上の値を、継続的に非同期でデータを取得したい場合に用いる事が多い
 
 チャットアプリや、SNSのタイムラインの監視等などはStreamで実施されることが多いらしい
+
+void main() {
+  final targetNum = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+  print("計算開始");
+
+  doSquare(targetNum).listen((resultNum) {
+    print(resultNum);
+  });
+}
+
+Stream<int> doSquare(List<int> targetNum) async* {
+  for (int n in targetNum) {
+    yield n * n;
+  }
+}
+
+計算開始
+1
+4
+9
+16
+25
+36
+49
+64
+81
+100
+
+void main() {
+  Stream<String> stream =
+      Stream<String>.fromIterable(['1', '2', '3', '4']);
+  
+  print('BEFORE');
+  
+  stream.listen((resultValue) {
+    print(resultValue);
+  });
+  
+  print('AFTER');
+}
+
+BEFORE
+AFTER
+1
+2
+3
+4
+
+void main() async {
+  Stream<String> stream = Stream<String>.fromIterable(['1', '2', '3', '4']);
+
+  print('BEFORE');
+
+  await for (String resultValue in stream) {
+    print(resultValue);
+  }
+
+  print('AFTER');
+}
+
+BEFORE
+1
+2
+3
+4
+AFTER
 
 await forとlistenの違いは、Streamの完了を待つか待たないか。
 await forはStreamの完了を待ってから、その後に記述したコードが実行されるため、AFTERが後に表示されますが、
@@ -86,6 +162,8 @@ listenはStreamの終了を待たずに後続する処理を実行します。
 [並列処理と並行処理について]
 FutureやStreamは、並列処理ではなく並行処理
 https://dart.dev/language/concurrency
+https://medium.com/dartlang/dart-asynchronous-programming-isolates-and-event-loops-bffc3e296a6a
+
 
 ほとんどのFlutterアプリケーションでは、Main Isolateと呼ばれる１つのスレッド上でほとんどの処理が実行されます。
 Main Isolateは独自のCPUとメモリヒープを確保しており、その中で各イベントを回すイベントサイクル(ループ)形式を取っています。
@@ -94,7 +172,6 @@ Main Isolateは独自のCPUとメモリヒープを確保しており、その�
 https://api.flutter.dev/flutter/dart-isolate/Isolate-class.html
 https://medium.com/flutter-jp/isolate-a3f6eab488b5
 https://dart.dev/language/isolates
-https://dart.dev/language/concurrency
 Main Isolate以外のスレッドを作る。
 
 利用可能な場合は追加のプロセッサコアを使用して、Dartコードで複数の独立したタスクを一度に実行可能
