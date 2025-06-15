@@ -93,6 +93,8 @@ Main Isolateは独自のCPUとメモリヒープを確保しており、その�
 [Isolate]
 https://api.flutter.dev/flutter/dart-isolate/Isolate-class.html
 https://medium.com/flutter-jp/isolate-a3f6eab488b5
+https://dart.dev/language/isolates
+https://dart.dev/language/concurrency
 Main Isolate以外のスレッドを作る。
 
 利用可能な場合は追加のプロセッサコアを使用して、Dartコードで複数の独立したタスクを一度に実行可能
