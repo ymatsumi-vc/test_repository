@@ -1,0 +1,106 @@
+同期処理
+
+[非同期処理]
+メリット
+・無駄な待ち時間が少ない
+デメリット
+・順序性の確保が面倒
+
+Flutterの非同期
+1.Future
+2.Stream
+3.Isolate
+
+1.Futureについて
+https://api.flutter.dev/flutter/dart-async/Future-class.html
+Futureコード例①
+Future<void> task1() {
+  return Future.delayed(const Duration(seconds: 2), () => print('task1'));
+}
+
+void tast2() {
+  return print("task2");
+}
+
+コード例②
+void main() {
+  print('ユーザ情報を取得しています...');
+  print(createOrderMessage());
+}
+
+String createOrderMessage() {
+  var order = fetchUserInfo(); // awaitをつける必要がある。
+  return '私の名前は $order です';
+}
+
+// 疑似的に時間がかかる処理を再現
+Future<String> fetchUserInfo() {
+  return Future.delayed(
+    const Duration(seconds: 2),
+    () => '田中太郎',
+  );
+}
+//output
+ユーザ情報を取得しています...
+私の名前は Instance of '_Future<String>' です
+
+// mainの左記にFutureを明記していますが、必須ではありません。
+// ですが、可読性を上げるためにも書くことをお勧めします。
+Future<void> main() async {
+  print('ユーザ情報を取得しています...');
+  print(await createOrderMessage());
+}
+
+Future<String> createOrderMessage() async {
+  var order = await fetchUserInfo();
+  return '私の名前は $order です';
+}
+
+// 疑似的に時間がかかる処理を再現
+Future<String> fetchUserInfo() {
+  return Future.delayed(
+    const Duration(seconds: 2),
+    () => '田中太郎',
+  );
+}
+
+・非同期のメソッドを定義する場合はasyncのキーワードをメソッド名の後ろに付与する。(ここではasyncFuncの後ろにくっついてる　async てやつ)
+・Future<String> というのは関数の型。「Futureクラス型」ということ。そして関数、メソッドの戻り値を<>ここに入れている。(ここではStirng型)
+将来的にはString型の戻り値ですよ〜ってこと。
+
+・同期処理のように記述できるが、非同期処理には変わりない点
+・awaitキーワードを付与した処理を待つという点
+・awaitを使用する場合は、asyncキーワードを必ず明記する必要がある。
+
+2.Streamについて
+https://api.flutter.dev/flutter/dart-async/Stream-class.html
+Futureは、１つの値を返し、1度きりの処理で完了する非同期処理を行う場合に用いる事が多い
+Streamは、１つ以上の値を、継続的に非同期でデータを取得したい場合に用いる事が多い
+
+チャットアプリや、SNSのタイムラインの監視等などはStreamで実施されることが多いらしい
+
+await forとlistenの違いは、Streamの完了を待つか待たないか。
+await forはStreamの完了を待ってから、その後に記述したコードが実行されるため、AFTERが後に表示されますが、
+listenはStreamの終了を待たずに後続する処理を実行します。
+
+[並列処理と並行処理について]
+FutureやStreamは、並列処理ではなく並行処理
+https://dart.dev/language/concurrency
+
+ほとんどのFlutterアプリケーションでは、Main Isolateと呼ばれる１つのスレッド上でほとんどの処理が実行されます。
+Main Isolateは独自のCPUとメモリヒープを確保しており、その中で各イベントを回すイベントサイクル(ループ)形式を取っています。
+
+[Isolate]
+https://api.flutter.dev/flutter/dart-isolate/Isolate-class.html
+https://medium.com/flutter-jp/isolate-a3f6eab488b5
+Main Isolate以外のスレッドを作る。
+
+利用可能な場合は追加のプロセッサコアを使用して、Dartコードで複数の独立したタスクを一度に実行可能
+サイズの大きいJSONのパース作業のようなCPUを大きく使用する作業の場合など
+
+全てのコードは isolate で実行される
+isolate は互いに状態を共有せず、メッセージによって通信する
+Flutter アプリケーションでは作業をメイン isolate で行い、基本的には十分な処理速度がある
+アプリケーションで大規模な計算を行う際にUIがガタつくことがあり、その解決に使用できる
+
+
