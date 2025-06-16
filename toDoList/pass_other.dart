@@ -1,7 +1,10 @@
 if (widget.invitation?.hasPrReward() == true)
 
-/// feature/visiting_pr_reward_word
+/// feature/pr_reward_word_invitation
 /// BUZMADEV-110 文言修正
+
+visiting:
+  pr_reward_mes
 
 /// 取材パス＞取材パス
 /// lib/task/task_bottom_sheet/each_task/visiting/visiting_widget.dart#L324
@@ -14,8 +17,17 @@ if (widget.match.invitation.hasPrReward() == true)
 
 
 
-/// feature/pr_reward_word_before_review
+/// feature/pr_reward_word_todo_task
 /// BUZMADEV-110 文言修正
+
+submit_sns_review:
+  pr_reward_mes:
+invitation_process_waiting
+  pr_reward_mes:
+
+  pr_reward_mes:
+invitation_process_todo:
+  pr_reward_mes:
 
 /// やること＞投稿前ステータス
 /// lib/task/task_bottom_sheet/each_task/submit_sns_reviews/submit_sns_review_widget.dart#L1854C17-L1863C19
@@ -26,9 +38,6 @@ if (widget.match.invitation.hasPrReward() == true)
     'Text追加',
     FlutterFlowTheme.of(context).bodyMedium.copyWith(),
   ),
-
-/// feature/pr_reward_word_confirm_review
-/// BUZMADEV-110 文言修正
 
 /// やること＞投稿・レポート確認中ステータス
 /// lib/task/task_component/invitation_process_waiting/invitation_process_waiting_widget.dart#L74
@@ -42,10 +51,8 @@ if (widget.match.invitation.hasPrReward() == true)
     ),
   ),
 
-/// feature/pr_reward_word_todo_insight
-/// BUZMADEV-110 文言修正
-
 /// やること > インサイトデータ提出
+/// lib/task/task_component/
 /// Text()修正
 /// この下に追加
 if (widget.match.invitation.hasPrReward() == true)
@@ -53,9 +60,6 @@ if (widget.match.invitation.hasPrReward() == true)
     'Text追加',
     FlutterFlowTheme.of(context).bodyMedium.copyWith(),
   ),
-
-/// feature/pr_reward_word_todo_evaluation
-/// BUZMADEV-110 文言修正
 
 /// やること＞イベント評価中ステータス
 /// lib/task/task_component/invitation_process_todo/invitation_process_todo_widget.dart#L96
