@@ -62,7 +62,7 @@ if (widget.invitation.hasPrReward())
 /// /lib/invitation_match/invitation_match_sns_waiting/invitation_match_sns_waiting_widget.dart#L165
 
 ///それぞれのProcessStatusCardWidgetの上あたりに追加
-if (widget.invitation.hasPrReward())
+if (widget.invitation?.hasPrReward() == true)
     Padding(
         padding: const EdgeInsets.fromLTRB(0.0, 40.0, 0.0, 56.0),
         child: Container(
