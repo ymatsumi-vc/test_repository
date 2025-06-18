@@ -1,7 +1,19 @@
+if (invitation is InvitationStruct) {
+  // InvitationStruct です
+} else {
+  // それ以外（Map, dynamic, null など）
+}
+
+
 /// やりとり > 投稿レポート確認画面
 /// /lib/invitation_match/invitation_match_report_confirm/invitation_match_report_confirm_widget.dart#L685
+
+final InvitationStruct invitationStruct = InvitationStruct.fromSerializableMap(widget.invitation);
+
 /// この上にいれる
-if (widget.invitation.hasPrReward())
+
+// PR報酬の場合、文言追加
+if (invitationStruct.hasPrReward() == true)
     Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
         child: Text(
@@ -33,7 +45,7 @@ if (widget.invitation.hasPrReward())
 ///ステータス31
 /// lib/invitation_match/invitation_match_ec_shipment_waiting/invitation_match_ec_shipment_waiting_widget.dart#L159
 
-///招待をキャンセル
+///招待をキャンセル　いらない
 ///ステータス40
 /// /lib/invitation_match/invitation_match_cancel/invitation_match_cancel_widget.dart#L116
 
@@ -41,15 +53,15 @@ if (widget.invitation.hasPrReward())
 ///ステータス45
 /// /lib/invitation_match/invitation_match_waiting/invitation_match_waiting_widget.dart#L165
 
-///招待キャンセル
-///ステータス50
+///招待キャンセル　いらない
+///ステータス50　
 /// /lib/invitation_match/invitation_match_cancel/invitation_match_cancel_widget.dart#L116
 
 ///訪問希望日時待ち
 ///ステータス55
 /// /lib/invitation_match/invitation_match_waiting/invitation_match_waiting_widget.dart#L165
 
-///招待キャンセル
+///招待キャンセル　いらない
 ///ステータス60
 /// /lib/invitation_match/invitation_match_cancel/invitation_match_cancel_widget.dart#L116
 
@@ -60,6 +72,8 @@ if (widget.invitation.hasPrReward())
 ///SNS口コミ待ち
 ///ステータス70
 /// /lib/invitation_match/invitation_match_sns_waiting/invitation_match_sns_waiting_widget.dart#L165
+
+final InvitationStruct invitationStruct = InvitationStruct.fromSerializableMap(widget.invitation);
 
 ///それぞれのProcessStatusCardWidgetの上あたりに追加
 if (widget.invitation?.hasPrReward() == true)
