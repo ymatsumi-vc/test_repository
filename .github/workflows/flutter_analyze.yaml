@@ -1,35 +1,38 @@
-name: Flutter Lint
+name: Flutter Analyze with reviewdog
+
 on:
   pull_request:
     branches: [ main, develop ]
-  push:
-    branches: [ main, develop ]
 
-defaults:
-  run:
-    working-directory: mobile
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
 
 jobs:
-  lint:
+  flutter-analyze:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
 
-      - name: Setup flutter
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: 'stable'
           channel: stable
 
       - name: Cache flutter dependencies
         uses: actions/cache@v3
         with:
-          # Flutter の pub パッケージキャッシュ
           path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('mobile/pubspec.yaml', 'mobile/pubspec.lock') }}
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: |
             ${{ runner.os }}-pub-
 
-      - run: flutter pub get
+      - name: Install dependencies
+        run: flutter pub get
 
       - name: Set up reviewdog
         uses: reviewdog/action-setup@v1
@@ -37,6 +40,13 @@ jobs:
       - name: Run Flutter Analyzer and Report via reviewdog
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: >
-          flutter analyze |
-          reviewdog -efm=" %#%t%*[a-z] %. %f:%l:%c %. %m" -reporter=github-pr-review -fail-level=warning -tee
+        run: |
+          flutter analyze --no-pub 2>&1 | \
+          reviewdog \
+            -efm="%f:%l:%c: %t%*[^:]: %m" \
+            -efm="%f:%l:%c • %m" \
+            -name="flutter-analyze" \
+            -reporter=github-pr-review \
+            -filter-mode=nofilter \
+            -fail-on-error=true \
+            -level=info
