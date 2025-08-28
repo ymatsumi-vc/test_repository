@@ -1,8 +1,9 @@
 name: Flutter Lint
 on:
   pull_request:
-    paths:
-      - "mobile/**"
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
 
 defaults:
   run:
