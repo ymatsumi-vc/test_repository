@@ -7,83 +7,17 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  analyze:
+  test:
+    name: Check the source code
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2.3.0
         with:
-          flutter-version: 'stable'
-
-      - name: Install dependencies
+          flutter-version: '2.22.0'
+      - name: Install packages
         run: flutter pub get
-
-      - name: Run flutter analyze with detailed output
-        run: |
-          echo "Running Flutter analyze..."
-          flutter analyze --no-pub > analyze_output.txt 2>&1 || true
-          
-          echo "=== Flutter Analyze Results ==="
-          cat analyze_output.txt
-          
-          # エラーや警告の数をカウント
-          ERROR_COUNT=$(grep -c "error •" analyze_output.txt || echo "0")
-          WARNING_COUNT=$(grep -c "warning •" analyze_output.txt || echo "0")
-          INFO_COUNT=$(grep -c "info •" analyze_output.txt || echo "0")
-          
-          echo ""
-          echo "=== Summary ==="
-          echo "Errors: $ERROR_COUNT"
-          echo "Warnings: $WARNING_COUNT"
-          echo "Infos: $INFO_COUNT"
-          
-          # エラーがある場合は詳細を表示
-          if [ "$ERROR_COUNT" -gt 0 ]; then
-            echo ""
-            echo "=== Error Details ==="
-            grep "error •" analyze_output.txt || true
-          fi
-          
-          # 警告がある場合は詳細を表示
-          if [ "$WARNING_COUNT" -gt 0 ]; then
-            echo ""
-            echo "=== Warning Details ==="
-            grep "warning •" analyze_output.txt || true
-          fi
-          
-          # infoがある場合は詳細を表示
-          if [ "$INFO_COUNT" -gt 0 ]; then
-            echo ""
-            echo "=== Info Details ==="
-            grep "info •" analyze_output.txt || true
-          fi
-
-      - name: Check for critical issues
-        run: |
-          # エラーや警告の数を再度チェック
-          ERROR_COUNT=$(grep -c "error •" analyze_output.txt || echo "0")
-          WARNING_COUNT=$(grep -c "warning •" analyze_output.txt || echo "0")
-          
-          if [ "$ERROR_COUNT" -gt 0 ]; then
-            echo "❌ Flutter analyze failed with $ERROR_COUNT error(s)"
-            exit 1
-          elif [ "$WARNING_COUNT" -gt 0 ]; then
-            echo "⚠️  Flutter analyze completed with $WARNING_COUNT warning(s)"
-            echo "Consider fixing these warnings before merging"
-            # 警告の場合は成功として扱う（必要に応じて exit 1 に変更）
-            exit 0
-          else
-            echo "✅ Flutter analyze passed with no issues"
-            exit 0
-          fi
-
-      - name: Upload analyze results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: flutter-analyze-results
-          path: analyze_output.txt
+      - name: Linter
+        run: flutter analyze
+      - name: Test
+        run: flutter test
