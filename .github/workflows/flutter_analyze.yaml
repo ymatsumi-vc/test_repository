@@ -20,7 +20,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.3'
+          flutter-version: '3.22.0'
           channel: 'stable'
           cache: true
 
@@ -50,13 +50,6 @@ jobs:
             # 例: "warning • The value of the field '_counter' isn't used • lib/main.dart:36:7 • unused_field"
             if echo "$line" | grep -qE "^\s*(error|warning|info)\s*•.*•.*•"; then
               # レベルを抽出 (error, warning, info)
-              level=$(echo "$line" | sed -E 's/^\s*(error|warning|info)\s*•.*/\1/' | tr -d ' ')
-              
-              # •で分割して各部分を抽出
-              # 1番目: レベル
-              # 2番目: メッセージ
-              # 3番目: ファイル情報 (ファイルパス:行番号:列番号)
-              # 4番目: ルール名
               
               # メッセージ部分を抽出 (1番目の•の後から2番目の•まで)
               message=$(echo "$line" | sed -E 's/^[^•]*•\s*([^•]+)\s*•.*/\1/' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
