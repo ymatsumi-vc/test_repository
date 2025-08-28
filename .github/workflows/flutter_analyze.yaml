@@ -38,4 +38,42 @@ jobs:
       - name: Run Flutter Analyze
         run: |
           echo "Running Flutter analyze..."
-          flutter analyze --no-pub
+          # Flutter analyzeを実行し、結果をファイルに保存
+          flutter analyze --no-pub > analyze_output.txt 2>&1 || true
+          
+          # 結果を表示
+          cat analyze_output.txt
+          
+          # GitHub Annotationを生成
+          while IFS= read -r line; do
+            # Flutter analyzeの出力形式: "warning • message • file:line:col • rule"
+            if echo "$line" | grep -E "^\s*(error|warning|info)\s*•" > /dev/null; then
+              # レベル抽出
+              level=$(echo "$line" | sed -E 's/^\s*(error|warning|info)\s*•.*/\1/' | tr -d ' ')
+              
+              # ファイル位置抽出 (3番目の部分)
+              file_location=$(echo "$line" | cut -d'•' -f3 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+              
+              # メッセージ抽出 (2番目の部分)
+              message=$(echo "$line" | cut -d'•' -f2 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+              
+              # ファイルパスと行番号を分離
+              if echo "$file_location" | grep -E ":[0-9]+:[0-9]+" > /dev/null; then
+                file_path=$(echo "$file_location" | cut -d':' -f1)
+                line_number=$(echo "$file_location" | cut -d':' -f2)
+                
+                # GitHub Annotationを出力
+                case "$level" in
+                  "error")
+                    echo "::error file=${file_path},line=${line_number}::${message}"
+                    ;;
+                  "warning")
+                    echo "::warning file=${file_path},line=${line_number}::${message}"
+                    ;;
+                  "info")
+                    echo "::notice file=${file_path},line=${line_number}::${message}"
+                    ;;
+                esac
+              fi
+            fi
+          done < analyze_output.txt
