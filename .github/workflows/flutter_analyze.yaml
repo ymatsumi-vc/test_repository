@@ -84,9 +84,11 @@ jobs:
                     ;;
                   "warning")
                     echo "::warning file=${file_path},line=${line_number}::${full_message}"
+                    analyze_failed="true"
                     ;;
                   "info")
                     echo "::notice file=${file_path},line=${line_number}::${full_message}"
+                    analyze_failed="true"
                     ;;
                 esac
               fi
