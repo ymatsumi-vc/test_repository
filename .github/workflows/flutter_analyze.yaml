@@ -41,41 +41,58 @@ jobs:
           flutter analyze --no-pub > analyze_output.txt 2>&1 || true
           
           # 結果の処理とGitHub Annotationの生成
-          if [ -s analyze_output.txt ]; then
-            echo "analyze_failed=true" >> $GITHUB_OUTPUT
-            
-            # analyze_output.txtの内容を解析してアノテーションを作成
-            while IFS= read -r line; do
-              # エラーや警告の行をパース (例: "  info • pubspec.yaml:1:1 • This is an info message")
-              if echo "$line" | grep -E "^\s*(error|warning|info)\s*•" > /dev/null; then
-                # ファイルパス、行番号、列番号、メッセージを抽出
-                level=$(echo "$line" | sed -E 's/^\s*(error|warning|info)\s*•.*/\1/')
-                file_info=$(echo "$line" | sed -E 's/^\s*(error|warning|info)\s*•\s*([^•]+)\s*•.*/\2/')
-                message=$(echo "$line" | sed -E 's/^\s*(error|warning|info)\s*•\s*[^•]+\s*•\s*(.*)/\2/')
+          analyze_failed="false"
+          
+          # Flutter analyzeの出力を1行ずつ処理
+          while IFS= read -r line || [ -n "$line" ]; do
+            # Flutter analyzeの出力形式に一致するかチェック
+            # 例: "warning • The value of the field '_counter' isn't used • lib/main.dart:36:7 • unused_field"
+            if echo "$line" | grep -qE "^\s*(error|warning|info)\s*•.*•.*•"; then
+              # レベルを抽出 (error, warning, info)
+              level=$(echo "$line" | sed -E 's/^\s*(error|warning|info)\s*•.*/\1/' | tr -d ' ')
+              
+              # •で分割して各部分を抽出
+              # 1番目: レベル
+              # 2番目: メッセージ
+              # 3番目: ファイル情報 (ファイルパス:行番号:列番号)
+              # 4番目: ルール名
+              
+              # メッセージ部分を抽出 (1番目の•の後から2番目の•まで)
+              message=$(echo "$line" | sed -E 's/^[^•]*•\s*([^•]+)\s*•.*/\1/' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+              
+              # ファイル情報を抽出 (2番目の•の後から3番目の•まで)
+              file_location=$(echo "$line" | sed -E 's/^[^•]*•[^•]*•\s*([^•]+)\s*•.*/\1/' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+              
+              # ルール名を抽出 (3番目の•の後)
+              rule_name=$(echo "$line" | sed -E 's/^[^•]*•[^•]*•[^•]*•\s*(.+)$/\1/' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+              
+              # ファイルパスと行番号を分離
+              if echo "$file_location" | grep -qE ":[0-9]+:[0-9]+"; then
+                file_path=$(echo "$file_location" | sed -E 's/^([^:]+):[0-9]+:[0-9]+.*$/\1/')
+                line_number=$(echo "$file_location" | sed -E 's/^[^:]+:([0-9]+):[0-9]+.*$/\1/')
                 
-                # ファイルパスと行番号を分離
-                if echo "$file_info" | grep -E ":[0-9]+:[0-9]+" > /dev/null; then
-                  file_path=$(echo "$file_info" | sed -E 's/^([^:]+):[0-9]+:[0-9]+.*/\1/')
-                  line_number=$(echo "$file_info" | sed -E 's/^[^:]+:([0-9]+):[0-9]+.*/\1/')
-                  
-                  # GitHub Annotationの出力
-                  case "$level" in
-                    "error")
-                      echo "::error file=$file_path,line=$line_number::$message"
-                      ;;
-                    "warning")
-                      echo "::warning file=$file_path,line=$line_number::$message"
-                      ;;
-                    "info")
-                      echo "::notice file=$file_path,line=$line_number::$message"
-                      ;;
-                  esac
-                fi
+                # 完全なメッセージを作成 (メッセージ + ルール名)
+                full_message="${message} (${rule_name})"
+                
+                # GitHub Annotationを出力
+                case "$level" in
+                  "error")
+                    echo "::error file=${file_path},line=${line_number}::${full_message}"
+                    analyze_failed="true"
+                    ;;
+                  "warning")
+                    echo "::warning file=${file_path},line=${line_number}::${full_message}"
+                    ;;
+                  "info")
+                    echo "::notice file=${file_path},line=${line_number}::${full_message}"
+                    ;;
+                esac
               fi
-            done < analyze_output.txt
-          else
-            echo "analyze_failed=false" >> $GITHUB_OUTPUT
-          fi
+            fi
+          done < analyze_output.txt
+          
+          # 結果をGitHub Actionsの出力変数に設定
+          echo "analyze_failed=${analyze_failed}" >> $GITHUB_OUTPUT
 
       - name: Display analyze results
         run: |
