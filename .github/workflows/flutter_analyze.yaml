@@ -1,4 +1,4 @@
-name: Flutter Analyze with reviewdog
+name: Flutter Analyze with GitHub Annotations
 
 on:
   pull_request:
@@ -34,12 +34,56 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Set up reviewdog
-        uses: reviewdog/action-setup@v1
-
-      - name: Run Flutter Analyzer and Report via reviewdog
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run Flutter Analyze
+        id: analyze
         run: |
-          flutter analyze --no-pub 2>&1 | \
-          reviewdog -efm=" %#%t%*[a-z] %. %f:%l:%c %. %m" -reporter=github-pr-review -fail-level=warning -tee
+          # Flutter analyzeを実行し、結果をファイルに保存
+          flutter analyze --no-pub > analyze_output.txt 2>&1 || true
+          
+          # 結果の処理とGitHub Annotationの生成
+          if [ -s analyze_output.txt ]; then
+            echo "analyze_failed=true" >> $GITHUB_OUTPUT
+            
+            # analyze_output.txtの内容を解析してアノテーションを作成
+            while IFS= read -r line; do
+              # エラーや警告の行をパース (例: "  info • pubspec.yaml:1:1 • This is an info message")
+              if echo "$line" | grep -E "^\s*(error|warning|info)\s*•" > /dev/null; then
+                # ファイルパス、行番号、列番号、メッセージを抽出
+                level=$(echo "$line" | sed -E 's/^\s*(error|warning|info)\s*•.*/\1/')
+                file_info=$(echo "$line" | sed -E 's/^\s*(error|warning|info)\s*•\s*([^•]+)\s*•.*/\2/')
+                message=$(echo "$line" | sed -E 's/^\s*(error|warning|info)\s*•\s*[^•]+\s*•\s*(.*)/\2/')
+                
+                # ファイルパスと行番号を分離
+                if echo "$file_info" | grep -E ":[0-9]+:[0-9]+" > /dev/null; then
+                  file_path=$(echo "$file_info" | sed -E 's/^([^:]+):[0-9]+:[0-9]+.*/\1/')
+                  line_number=$(echo "$file_info" | sed -E 's/^[^:]+:([0-9]+):[0-9]+.*/\1/')
+                  
+                  # GitHub Annotationの出力
+                  case "$level" in
+                    "error")
+                      echo "::error file=$file_path,line=$line_number::$message"
+                      ;;
+                    "warning")
+                      echo "::warning file=$file_path,line=$line_number::$message"
+                      ;;
+                    "info")
+                      echo "::notice file=$file_path,line=$line_number::$message"
+                      ;;
+                  esac
+                fi
+              fi
+            done < analyze_output.txt
+          else
+            echo "analyze_failed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Display analyze results
+        run: |
+          echo "Flutter analyze results:"
+          cat analyze_output.txt || echo "No analyze output found"
+
+      - name: Fail if analysis has errors
+        if: steps.analyze.outputs.analyze_failed == 'true'
+        run: |
+          echo "Flutter analyze found issues. Check the annotations above for details."
+          exit 1
