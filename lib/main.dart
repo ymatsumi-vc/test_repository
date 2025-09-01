@@ -44,14 +44,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  // Dead code example: This function is never called
-  void _deadFunction() {
-    final unusedVariable = 42;
-    if (unquedVariable > 0 ?? false) {
-      print('This will never be printed.');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -89,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
+            const Text(
               'You have pushed the button this many times.',
             ),
             Text(
