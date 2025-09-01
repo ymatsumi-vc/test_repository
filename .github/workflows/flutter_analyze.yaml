@@ -20,7 +20,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          flutter-version: '3.24.3'
           channel: 'stable'
           cache: true
 
@@ -47,27 +47,28 @@ jobs:
           # Flutter analyzeの出力を1行ずつ処理
           while IFS= read -r line || [ -n "$line" ]; do
             # Flutter analyzeの出力形式に一致するかチェック
-            # 例: "warning • The value of the field '_counter' isn't used • lib/main.dart:36:7 • unused_field"
+            # 例: "warning • The value of the field 'text' isn't used • lib/main.dart:36:7 • unused_field"
             if echo "$line" | grep -qE "^\s*(error|warning|info)\s*•.*•.*•"; then
               # レベルを抽出 (error, warning, info)
-              
+              level=$(echo "$line" | sed -E 's/^\s*(error|warning|info)\s*•.*/\1/' | tr -d ' ')
+          
               # メッセージ部分を抽出 (1番目の•の後から2番目の•まで)
               message=$(echo "$line" | sed -E 's/^[^•]*•\s*([^•]+)\s*•.*/\1/' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-              
+          
               # ファイル情報を抽出 (2番目の•の後から3番目の•まで)
               file_location=$(echo "$line" | sed -E 's/^[^•]*•[^•]*•\s*([^•]+)\s*•.*/\1/' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-              
+          
               # ルール名を抽出 (3番目の•の後)
               rule_name=$(echo "$line" | sed -E 's/^[^•]*•[^•]*•[^•]*•\s*(.+)$/\1/' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-              
+          
               # ファイルパスと行番号を分離
               if echo "$file_location" | grep -qE ":[0-9]+:[0-9]+"; then
                 file_path=$(echo "$file_location" | sed -E 's/^([^:]+):[0-9]+:[0-9]+.*$/\1/')
                 line_number=$(echo "$file_location" | sed -E 's/^[^:]+:([0-9]+):[0-9]+.*$/\1/')
-                
+          
                 # 完全なメッセージを作成 (メッセージ + ルール名)
                 full_message="${message} (${rule_name})"
-                
+          
                 # GitHub Annotationを出力
                 case "$level" in
                   "error")
@@ -76,9 +77,11 @@ jobs:
                     ;;
                   "warning")
                     echo "::warning file=${file_path},line=${line_number}::${full_message}"
+                    analyze_failed="true"
                     ;;
                   "info")
                     echo "::notice file=${file_path},line=${line_number}::${full_message}"
+                    analyze_failed="true"
                     ;;
                 esac
               fi
