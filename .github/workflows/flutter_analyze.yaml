@@ -1,4 +1,3 @@
-
 name: Flutter Analyze with GitHub Annotations
 
 on:
@@ -40,7 +39,7 @@ jobs:
         id: analyze
         run: |
           # Flutter analyzeを実行し、結果をファイルに保存
-          flutter analyze --no-pub > analyze_output.txt 2>&1 || true
+          flutter analyze lib/ --no-pub > analyze_output.txt 2>&1 || true
           
           # 結果の処理とGitHub Annotationの生成
           analyze_failed="false"
@@ -70,21 +69,13 @@ jobs:
                 # 完全なメッセージを作成 (メッセージ + ルール名)
                 full_message="${message} (${rule_name})"
           
-                # GitHub Annotationを出力
-                case "$level" in
-                  "error")
-                    echo "::error file=${file_path},line=${line_number}::${full_message}"
-                    analyze_failed="true"
-                    ;;
-                  "warning")
-                    echo "::warning file=${file_path},line=${line_number}::${full_message}"
-                    analyze_failed="true"
-                    ;;
-                  "info")
-                    echo "::notice file=${file_path},line=${line_number}::${full_message}"
-                    analyze_failed="true"
-                    ;;
-                esac
+                # GitHub Annotationを出力（error, warning, infoはnoticeに変換）
+                if [ "$level" = "info" ]; then
+                  echo "::notice file=${file_path},line=${line_number}::${message} (${rule_name})"
+                else
+                  echo "::${level} file=${file_path},line=${line_number}::${message} (${rule_name})"
+                fi
+                analyze_failed="true"
               fi
             fi
           done < analyze_output.txt
