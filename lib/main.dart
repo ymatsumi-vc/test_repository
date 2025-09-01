@@ -24,8 +24,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-
-
   final String title;
 
   @override
@@ -44,6 +42,14 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+  }
+
+  // Dead code example: This function is never called
+  void _deadFunction() {
+    final unusedVariable = 42;
+    if (unquedVariable > 0 ?? false) {
+      print('This will never be printed.');
+    }
   }
 
   @override
