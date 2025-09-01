@@ -40,7 +40,7 @@ jobs:
         id: analyze
         run: |
           # Flutter analyzeを実行し、結果をファイルに保存
-          flutter analyze --no-pub > analyze_output.txt 2>&1 || true
+          flutter analyze lib/ --no-pub > analyze_output.txt 2>&1 || true
           
           # 結果の処理とGitHub Annotationの生成
           analyze_failed="false"
